@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Button from '../components/Button';
 import { GoogleIcon, GithubIcon } from '../components/icons/Icons';
@@ -32,9 +33,14 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
     } catch(err: any) {
         console.error(err);
         let msg = "An unknown error occurred.";
+        
+        // Handle specific Firebase Auth errors
         if (err.code === 'auth/invalid-credential') msg = "Invalid email or password.";
         else if (err.code === 'auth/email-already-in-use') msg = "Email already in use.";
+        else if (err.code === 'auth/operation-not-allowed') msg = "Login method not enabled. Please enable Email/Password in Firebase Console.";
+        else if (err.code === 'auth/weak-password') msg = "Password should be at least 6 characters.";
         else if (err.message) msg = err.message;
+        
         setError(msg);
     } finally {
         setIsLoading(false);
@@ -51,7 +57,13 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
           onLogin(user);
       } catch (err: any) {
           console.error(err);
-          setError(err.message || "Provider login failed.");
+          let msg = "Provider login failed.";
+          
+          if (err.code === 'auth/popup-closed-by-user') msg = "Login cancelled.";
+          else if (err.code === 'auth/operation-not-allowed') msg = `${provider === 'google' ? 'Google' : 'GitHub'} login is not enabled in Firebase Console.`;
+          else if (err.message) msg = err.message;
+
+          setError(msg);
       } finally {
           setIsLoading(false);
       }
@@ -80,7 +92,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
                     value={name}
                     onChange={e => setName(e.target.value)}
                     required
-                    className="w-full px-4 py-2 bg-zinc-800 border border-zinc-600 rounded-md focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                    className="w-full px-4 py-2 bg-zinc-800 border border-zinc-600 rounded-md focus:ring-2 focus:ring-amber-500 focus:outline-none text-white"
                 />
             )}
             <input
@@ -89,7 +101,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-2 bg-zinc-800 border border-zinc-600 rounded-md focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                className="w-full px-4 py-2 bg-zinc-800 border border-zinc-600 rounded-md focus:ring-2 focus:ring-amber-500 focus:outline-none text-white"
             />
             <input
                 type="password"
@@ -97,10 +109,10 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 required
-                className="w-full px-4 py-2 bg-zinc-800 border border-zinc-600 rounded-md focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                className="w-full px-4 py-2 bg-zinc-800 border border-zinc-600 rounded-md focus:ring-2 focus:ring-amber-500 focus:outline-none text-white"
             />
 
-            {error && <p className="text-sm text-red-500 text-center">{error}</p>}
+            {error && <div className="p-2 bg-red-900/50 border border-red-700 rounded text-sm text-red-200 text-center">{error}</div>}
 
             <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? 'Processing...' : (formType === 'login' ? 'Sign In' : 'Sign Up')}
