@@ -3,10 +3,15 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, Auth } from 'firebase/auth';
 import { getFirestore, Firestore } from 'firebase/firestore';
 
-// Helper to safely access env vars to prevent crashes if import.meta.env is undefined
+// Helper to safely access env vars and strip accidental quotes
 const getEnv = (key: string) => {
     try {
-        return (import.meta as any).env?.[key];
+        const value = (import.meta as any).env?.[key];
+        if (value && typeof value === 'string') {
+            // Remove start/end quotes if user pasted them by mistake
+            return value.replace(/^"|"$/g, '').replace(/^'|'$/g, '');
+        }
+        return value;
     } catch {
         return undefined;
     }
