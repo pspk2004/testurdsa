@@ -1,0 +1,8 @@
+{
+  "name": "testURdsa",
+  "description": "A full-stack web application that allows users to take a custom DSA (Data Structures & Algorithms) test, proctored using their webcam and microphone.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
